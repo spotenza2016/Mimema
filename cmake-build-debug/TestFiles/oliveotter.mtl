@@ -20,7 +20,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd olivescared.jpg
+map_Kd TestFiles/olivescared.jpg
 
 newmtl Material.003
 Ns 96.078431
@@ -41,8 +41,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 0.000000
 illum 1
-map_Kd eyes2.png
-map_d D:\\Shipwrecked64\\textures\\eyes2.png
+map_Kd TestFiles/eyes2.png
+map_d TestFiles/eyes2.png
 
 newmtl Material.016
 Ns 96.078431

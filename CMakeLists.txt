@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 project(Mimema)
 
 # For standalone exe
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
 set(CMAKE_CXX_STANDARD 14)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -27,6 +27,6 @@ FetchContent_MakeAvailable(glm)
 
 include_directories("D:\\Downloads\\STB\\stb")
 
-# Add WIN32 after exe name to avoid command prompt
-add_executable(Mimema WIN32 main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h)
+# Add WIN32 after exe name to avoid command prompt (will disable cout)
+add_executable(Mimema main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h)
 target_link_libraries(Mimema glfw GLEW::GLEW OpenGL32 glm)

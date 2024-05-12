@@ -140,7 +140,8 @@ Model::Model(string fileName) {
                 continue;
             }
 
-            materialList = readMaterial(parts.at(1));
+            // TODO Major! Make this not hardcoded
+            materialList = readMaterial("TestFiles/" + parts.at(1));
         }
         // Change current materialList
         else if (parts.at(0) == "usemtl") {
