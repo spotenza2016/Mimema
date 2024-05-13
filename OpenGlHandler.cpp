@@ -104,6 +104,8 @@ int OpenGlHandler::initShaders() {
     // Fixing this requires frame to be spent fully in polling (either by no Vsync, or by more accurate delta T?)
     // Likely requires own synchronization method and would require a LOT of effort, eventual TODO
     glfwSwapInterval(0);
+
+    return 0;
 }
 
 void OpenGlHandler::initUniforms() {
