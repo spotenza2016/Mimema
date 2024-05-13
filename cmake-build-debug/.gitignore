@@ -14,3 +14,5 @@ glfw
 CMakeFiles
 
 _deps
+
+test_fs_support_case_sensitivity

@@ -5,28 +5,58 @@ project(Mimema)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 
 set(CMAKE_CXX_STANDARD 14)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(D:\\Downloads\\glfw-3.3.9\\glfw-3.3.9 glfw)
-
-find_package(OpenGL REQUIRED)
-
-list(APPEND CMAKE_PREFIX_PATH "D:\\Downloads\\glew-2.1.0-win32\\glew-2.1.0")
-find_package(GLEW REQUIRED)
-
 include(FetchContent)
 
+# GlFW
+FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw
+)
+FetchContent_GetProperties(glfw)
+if(NOT glfw_POPULATED)
+    FetchContent_Populate(glfw)
+
+    set(GLFW_BUILD_EXAMPLES OFF CACHE INTERNAL "Build the GLFW example programs")
+    set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "Build the GLFW test programs")
+    set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build the GLFW documentation")
+    set(GLFW_INSTALL OFF CACHE INTERNAL "Generate installation target")
+
+    add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
+endif()
+
+# GLEW
+find_package(OpenGL REQUIRED)
+FetchContent_Declare(
+        glew
+        GIT_REPOSITORY https://github.com/Perlmint/glew-cmake
+)
+FetchContent_GetProperties(glew)
+if(NOT glew_POPULATED)
+    FetchContent_Populate(glew)
+
+    add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# GLM
 FetchContent_Declare(
         glm
         GIT_REPOSITORY	https://github.com/g-truc/glm.git
         GIT_TAG 	bf71a834948186f4097caa076cd2663c69a10e1e #refs/tags/0.9.9.8
 )
-
 FetchContent_MakeAvailable(glm)
 
-include_directories("D:\\Downloads\\STB\\stb")
+# STB_IMAGE
+FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/gracicot/stb-cmake.git
+)
+FetchContent_GetProperties(stb)
+if(NOT stb_POPULATED)
+    FetchContent_Populate(stb)
+
+    add_subdirectory(${stb_SOURCE_DIR} ${stb_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 # Add WIN32 after exe name to avoid command prompt (will disable cout)
 add_executable(Mimema main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h)
-target_link_libraries(Mimema glfw GLEW::GLEW OpenGL32 glm)
+target_link_libraries(Mimema glfw libglew_static OpenGL32 glm stb::image)

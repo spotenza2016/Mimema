@@ -1,6 +1,6 @@
 #include "Material.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 const glm::vec3& Material::getKd() {
     return kd;
