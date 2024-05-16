@@ -22,7 +22,7 @@ public:
         float angleX = 0;
         float angleY = 0;
         float angleZ = 0;
-        glm::vec3 scale = glm::vec3(0.025, 0.025, 0.025);
+        glm::vec3 scale = glm::vec3(1, 1, 1);
 
     public:
         glm::mat4 getModelMatrix();
@@ -86,7 +86,7 @@ private:
     };
 
     // Model Uniforms (will be moved to material and array eventually)
-    float phongExponent = 12.0f;
+    float phongExponent = 16.0f;
     glm::vec3 specularColor = glm::vec3(0.3f, 0.3f, 0.3f);
 
     vector<Vertex*> vertices;

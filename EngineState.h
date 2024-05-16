@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Level.h"
 #include "Object.h"
+#include "PhysicsObject.h"
 
 struct EngineState {
     Camera::CameraState cameraPrevState;

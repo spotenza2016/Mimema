@@ -16,16 +16,16 @@ public:
         // Projection Matrix
         float fov = 70;
         float nearClippingPlane = 0.1f;
-        float farClippingPlane = 100.0f;
+        float farClippingPlane = 1000.0f;
         float aspectRatio = 1.0;
 
     public:
 
         // Getters
-        glm::mat4 getViewProjectionMatrix() const;
-        glm::mat4 static calculateViewProjectionMatrix(const glm::vec3& cameraPosition, const glm::vec3& cameraTarget,
-                                                       const glm::vec3& upVec, float fov, float nearClippingPlane,
-                                                       float farClippingPlane, float aspectRatio);
+        glm::mat4 getViewMatrix() const;
+        glm::mat4 getProjectionMatrix() const;
+        glm::mat4 static calculateViewMatrix(const glm::vec3& cameraPosition, const glm::vec3& cameraTarget, const glm::vec3& upVec);
+        glm::mat4 static calculateProjectionMatrix(float fov, float nearClippingPlane, float farClippingPlane, float aspectRatio);
         const glm::vec3& getCameraPosition() const;
         const glm::vec3& getCameraTarget() const;
         const glm::vec3& getUpVec() const;

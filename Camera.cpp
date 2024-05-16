@@ -3,16 +3,22 @@ Camera::CameraState& Camera::getCameraState() {
     return cameraState;
 }
 
-glm::mat4 Camera::CameraState::getViewProjectionMatrix() const {
-    return CameraState::calculateViewProjectionMatrix(cameraPosition, cameraTarget, upVec, fov, nearClippingPlane, farClippingPlane, aspectRatio);
+glm::mat4 Camera::CameraState::getViewMatrix() const {
+    return CameraState::calculateViewMatrix(cameraPosition, cameraTarget, upVec);
 }
 
-glm::mat4 Camera::CameraState::calculateViewProjectionMatrix(const glm::vec3 &cameraPosition,
-                                                             const glm::vec3 &cameraTarget, const glm::vec3 &upVec,
-                                                             float fov, float nearClippingPlane, float farClippingPlane,
-                                                             float aspectRatio) {
-    return glm::perspective(glm::radians(fov), aspectRatio, nearClippingPlane, farClippingPlane)
-           * glm::lookAt(cameraPosition, cameraTarget, upVec);
+glm::mat4 Camera::CameraState::getProjectionMatrix() const {
+    return CameraState::calculateProjectionMatrix(fov, nearClippingPlane, farClippingPlane, aspectRatio);
+}
+
+glm::mat4 Camera::CameraState::calculateViewMatrix(const glm::vec3 &cameraPosition,
+                                                   const glm::vec3 &cameraTarget, const glm::vec3 &upVec) {
+    return glm::lookAt(cameraPosition, cameraTarget, upVec);
+}
+
+glm::mat4 Camera::CameraState::calculateProjectionMatrix(float fov, float nearClippingPlane, float farClippingPlane,
+                                                         float aspectRatio) {
+    return glm::perspective(glm::radians(fov), aspectRatio, nearClippingPlane, farClippingPlane);
 }
 
 const glm::vec3& Camera::CameraState::getCameraPosition() const {

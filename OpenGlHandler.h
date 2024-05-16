@@ -27,12 +27,14 @@ class OpenGlHandler {
 
     // Uniform Constants
     const char* vertexMatrixUniformName = "matrix";
+    const char* normalMatrixUniformName = "normalMatrix";
+    const char* modelViewMatrixUniformName = "modelViewMatrix";
     const char* ambientLightIntensityUniformName = "ambientLightIntensity";
     const char* lightIntensityUniformName = "lightIntensity";
     const char* phongExponentUniformName = "phongExponent";
     const char* lightVecUniformName = "lightVec";
     const char* specularColorUniformName = "specularColor";
-    unsigned int uniformMatrixID, uniformAmbientLightIntensityID, uniformLightIntensityID, uniformPhongExponentID, uniformLightVecID, uniformSpecularColorID;
+    unsigned int uniformMatrixID, uniformNormalMatrixID, uniformModelViewMatrixID, uniformAmbientLightIntensityID, uniformLightIntensityID, uniformPhongExponentID, uniformLightVecID, uniformSpecularColorID;
 
     // Function to read shader files
     static char* readShader(const string& fileName);

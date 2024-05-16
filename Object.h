@@ -12,5 +12,5 @@ public:
     void setModel(string objFileName);
 
     // Destructor
-    ~Object();
+    virtual ~Object();
 };

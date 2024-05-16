@@ -112,6 +112,12 @@ void OpenGlHandler::initUniforms() {
     // Create a Uniform Matrix
     uniformMatrixID = glGetUniformLocation(shaderProgram, vertexMatrixUniformName);
 
+    // Create a normal matrix uniform
+    uniformNormalMatrixID = glGetUniformLocation(shaderProgram, normalMatrixUniformName);
+
+    // Create a model view matrix uniform
+    uniformModelViewMatrixID = glGetUniformLocation(shaderProgram, modelViewMatrixUniformName);
+
     // Add the ambient light intensity uniform
     uniformAmbientLightIntensityID = glGetUniformLocation(shaderProgram, ambientLightIntensityUniformName);
 
@@ -130,8 +136,6 @@ void OpenGlHandler::initUniforms() {
 
 // TODO more clean up here
 void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, double alpha) {
-    // for testing w/o interpolation
-    //alpha = 1;
     // Background
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -145,8 +149,9 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
     float nearClippingPlane = engineState.camera.getCameraState().getNearClippingPlane() * (float)alpha + engineState.cameraPrevState.getNearClippingPlane() * (float)(1 - alpha);
     float farClippingPlane = engineState.camera.getCameraState().getFarClippingPlane() * (float)alpha + engineState.cameraPrevState.getFarClippingPlane() * (float)(1 - alpha);
     float aspectRatio = engineState.camera.getCameraState().getAspectRatio() * (float)alpha + engineState.cameraPrevState.getAspectRatio() * (float)(1 - alpha);
-    glm::mat4 viewProjectionMatrix = Camera::CameraState::calculateViewProjectionMatrix(cameraPosition, cameraTarget, upVec, fov, nearClippingPlane, farClippingPlane, aspectRatio);
-    glm::vec3 lightVec = viewProjectionMatrix * glm::vec4(engineState.level.getLevelState().getLightVec() * (float)alpha + engineState.levelPrevState.getLightVec() * (float)(1 - alpha), 0);
+    glm::mat4 projectionMatrix = Camera::CameraState::calculateProjectionMatrix(fov, nearClippingPlane, farClippingPlane, aspectRatio);
+    glm::mat4 viewMatrix = Camera::CameraState::calculateViewMatrix(cameraPosition, cameraTarget, upVec);
+    glm::vec3 lightVec = viewMatrix * glm::vec4(engineState.level.getLevelState().getLightVec() * (float)alpha + engineState.levelPrevState.getLightVec() * (float)(1 - alpha), 0);
     glUniform3fv(uniformLightVecID, 1, &lightVec[0]);
 
     // todo will need to be adjusted for add/delete
@@ -163,14 +168,18 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
         float angleY = nextState.getAngleY() * (float)alpha + prevState.getAngleY() * (float)(1 - alpha);
         float angleZ = nextState.getAngleZ() * (float)alpha + prevState.getAngleZ() * (float)(1 - alpha);
         glm::vec3 scale = nextState.getScale() * (float)alpha + prevState.getScale() * (float)(1 - alpha);
-        glm::mat4 mvpMatrix = viewProjectionMatrix * Model::ModelState::calculateModelMatrix(translate, angleX, angleY, angleZ, scale);
+        glm::mat4 modelViewMatrix = viewMatrix * Model::ModelState::calculateModelMatrix(translate, angleX, angleY, angleZ, scale);
+        glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelViewMatrix));
+        glm::mat4 mvpMatrix = projectionMatrix * modelViewMatrix;
+        glUniformMatrix4fv(uniformMatrixID, 1, false, &mvpMatrix[0][0]);
+        glUniformMatrix3fv(uniformNormalMatrixID, 1, false, &normalMatrix[0][0]);
+        glUniformMatrix4fv(uniformModelViewMatrixID, 1, false, &modelViewMatrix[0][0]);
 
         for (int j = 0; j < model->getNumGroups(); j++) {
             glUseProgram(shaderProgram);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, model->getTexture(j));
 
-            glUniformMatrix4fv(uniformMatrixID, 1, false, &mvpMatrix[0][0]);
             glUniform1f(uniformPhongExponentID, model->getPhongExponent());
             glUniform3fv(uniformSpecularColorID, 1, &model->getSpecularColor()[0]);
             glBindVertexArray(model->getVAO(j));

@@ -4,18 +4,17 @@ layout (location = 1) in vec4 fragColor;
 layout (location = 2) in vec3 normal;
 layout (location = 3) in vec2 texture;
 uniform mat4 matrix;
-uniform vec3 lightVec;
+uniform mat4 modelViewMatrix;
+uniform mat3 normalMatrix;
 out vec3 vFragPos;
 out vec4 vFragColor;
 out vec3 vFragNormal;
-out vec3 vLightVec;
 out vec2 vTexture;
 void main()
 {
    gl_Position = matrix * vec4(aPos.x, aPos.y, aPos.z, aPos.w);
-   vFragPos = vec3(gl_Position);
-   vFragNormal = normalize(vec3(matrix * vec4(normal, 0)));
-   vLightVec = lightVec;
+   vFragPos = vec3(modelViewMatrix * vec4(aPos.x, aPos.y, aPos.z, aPos.w));
+   vFragNormal = normalize(normalMatrix * normal);
    vFragColor = fragColor;
    vTexture = texture;
 }

@@ -4,22 +4,23 @@
 #include <chrono>
 #include "Level.h"
 #include "Camera.h"
-#include <unistd.h>
-#include <windows.h>
-#include <winuser.h>
+#include "Object.h"
+#include "PhysicsObject.h"
 using namespace std;
 
 // Core class of the engine
 class EngineCore {
 public:
-    // Microseconds per Frame in 60 FPS
+    // Seconds per Frame in 60 FPS
     constexpr static double simulationFPS = 144;
     constexpr static double minimumFPS = 5;
-    constexpr static double simulationDeltaT = 1.0 / simulationFPS * 1000000000;
-    constexpr static double maxDeltaT = max(1.0 / minimumFPS * 1000000000, simulationDeltaT);
+    constexpr static double simulationDeltaT = 1.0 / simulationFPS;
+    constexpr static double maxDeltaT = max(1.0 / minimumFPS, simulationDeltaT);
 
     // Core Loop of Engine
     void engineLoop(int width, int height, const string& name);
+
+    void handlePhysics(EngineState& state);
 
     // TODO move to own class
     // Keyboard controls

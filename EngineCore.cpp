@@ -28,7 +28,7 @@ void EngineCore::engineLoop(int width, int height, const string& name) {
     auto t1 = chrono::high_resolution_clock::now();
     while (!glfwWindowShouldClose(window)) {
         auto t2 = chrono::high_resolution_clock::now();
-        double deltaT = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
+        double deltaT = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count() / 1000000000.0;
         t1 = t2;
         accumulator += deltaT;
 
@@ -43,7 +43,8 @@ void EngineCore::engineLoop(int width, int height, const string& name) {
 
             engineState.saveStates();
             processInput(window, &engineState.camera);
-            engineState.objects.at(0)->model->getModelState().setAngleY(engineState.objects.at(0)->model->getModelState().getAngleY() + 0.03 * simulationDeltaT / 40000000);
+            handlePhysics(engineState);
+            engineState.objects.at(0)->model->getModelState().setAngleY(engineState.objects.at(0)->model->getModelState().getAngleY() + 0.03 * simulationDeltaT * 100);
         }
         const double alpha = accumulator / simulationDeltaT;
 
@@ -67,7 +68,7 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
     glm::vec2 mouseMovement = glm::vec2((float)(cursorX - lastCursorPosX), (float)(cursorY - lastCursorPosY));
     float yaw = (cursorX - lastCursorPosX) * cursorSens;
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        yaw += 0.01 * simulationDeltaT / 10000000;
+        yaw += 0.01 * simulationDeltaT;
     }
     float pitch = mouseMovement.y * cursorSens;
     glm::vec3 direction = glm::normalize(camera->getCameraState().getCameraTarget() - camera->getCameraState().getCameraPosition());
@@ -81,7 +82,7 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
     lastCursorPosY = cursorY;
     lastCursorPosX = cursorX;
 
-    float movement = 0.01 * simulationDeltaT / 10000000;
+    float movement = 0.01 * simulationDeltaT * 4000;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -132,4 +133,17 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
     }
 
     // todo normalize movement vector to avoid diagnal thing
+}
+
+void EngineCore::handlePhysics(EngineState& state) {
+    for (int i = 0; i < state.objects.size(); i++) {
+        Object* object = state.objects.at(i);
+        PhysicsObject* physicsObject = dynamic_cast<PhysicsObject*>(object);
+
+        if (physicsObject) {
+            physicsObject->passTime(simulationDeltaT);
+        }
+
+        // TODO put quad tree here
+    }
 }

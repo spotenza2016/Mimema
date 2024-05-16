@@ -7,9 +7,9 @@
 class Level {
 public:
     class LevelState {
-        float ambientLightIntensity = 0.8f;
+        float ambientLightIntensity = 0.2f;
         float lightIntensity = 0.8f;
-        glm::vec3 lightVec = glm::normalize(glm::vec3(0, 0, -1.0f));
+        glm::vec3 lightVec = glm::normalize(glm::vec3(0, -1, -1.0f));
 
     public:
         // Getters
