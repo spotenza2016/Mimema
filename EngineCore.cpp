@@ -42,6 +42,7 @@ void EngineCore::engineLoop(int width, int height, const string& name) {
             accumulator -= simulationDeltaT;
 
             engineState.saveStates();
+            // maybe move outside loop? or just grab input outside loop
             processInput(window, &engineState.camera);
             handlePhysics(engineState);
             engineState.objects.at(0)->model->getModelState().setAngleY(engineState.objects.at(0)->model->getModelState().getAngleY() + 0.03 * simulationDeltaT * 100);
@@ -141,7 +142,7 @@ void EngineCore::handlePhysics(EngineState& state) {
         PhysicsObject* physicsObject = dynamic_cast<PhysicsObject*>(object);
 
         if (physicsObject) {
-            physicsObject->passTime(simulationDeltaT);
+            //physicsObject->passTime(simulationDeltaT);
         }
 
         // TODO put quad tree here

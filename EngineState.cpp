@@ -6,6 +6,10 @@ EngineState::EngineState() {
     objectOne->setModel("TestFiles/oliveotter.obj");
     objectOne->setPosition(glm::vec3(0, 0, 20));
     objects.push_back(objectOne);
+    Object* character = new Object();
+    character->setModel("TestFiles/Secal.obj");
+    character->model->getModelState().setTranslate(glm::vec3(0, 0, 40));
+    objects.push_back(character);
     Object* objectTwo = new Object();
     objectTwo->setModel("TestFiles/sphere.obj");
     objectTwo->model->getModelState().setTranslate(glm::vec3(-20, 0, 0));
