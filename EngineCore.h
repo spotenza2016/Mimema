@@ -6,10 +6,12 @@
 #include "Camera.h"
 #include "Object.h"
 #include "PhysicsObject.h"
+#include "Octree.h"
 using namespace std;
 
 // Core class of the engine
 class EngineCore {
+    CollisionBox physicsBounds = {{-100000, -100000, -100000}, {200000, 200000, 200000}};
 public:
     // Seconds per Frame in 60 FPS
     constexpr static double simulationFPS = 144;

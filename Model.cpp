@@ -71,6 +71,32 @@ Model::Model(string fileName) {
             }
 
             vertices.push_back(new Vertex(stof(parts.at(1)), stof(parts.at(2)), stof(parts.at(3))));
+
+            if (vertices.size() == 1) {
+                negativeBound = {vertices[0]->x, vertices[0]->y, vertices[0]->z};
+                positiveBound = negativeBound;
+            }
+            else {
+                Vertex* vertex = vertices[vertices.size() - 1];
+                if (vertex->x < negativeBound.x) {
+                    negativeBound.x = vertex->x;
+                }
+                if (vertex->y < negativeBound.y) {
+                    negativeBound.y = vertex->y;
+                }
+                if (vertex->z < negativeBound.z) {
+                    negativeBound.z = vertex->z;
+                }
+                if (vertex->x > positiveBound.x) {
+                    positiveBound.x = vertex->x;
+                }
+                if (vertex->y > positiveBound.y) {
+                    positiveBound.y = vertex->y;
+                }
+                if (vertex->z > positiveBound.z) {
+                    positiveBound.z = vertex->z;
+                }
+            }
         }
         // Texture Vertex
         else if (parts.at(0) == "vt") {
@@ -439,4 +465,12 @@ Model::~Model() {
     for (int i = 0; i < vertexTextures.size(); i++) {
         delete vertexTextures.at(i);
     }
+}
+
+CollisionBox Model::getCollision() {
+    glm::vec3 movedNegativeBound = modelState.getScale() * negativeBound + modelState.getTranslate();
+    glm::vec3 movedPositiveBound = modelState.getScale() * positiveBound + modelState.getTranslate();
+
+    glm::vec3 size = abs(movedPositiveBound - movedNegativeBound);
+    return {min(movedNegativeBound, movedPositiveBound), size};
 }

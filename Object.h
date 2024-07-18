@@ -13,4 +13,6 @@ public:
 
     // Destructor
     virtual ~Object();
+
+    CollisionBox getCollision();
 };

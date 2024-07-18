@@ -12,6 +12,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <map>
 #include "Material.h"
+#include "CollisionBox.h"
 using namespace std;
 
 class Model {
@@ -94,6 +95,9 @@ private:
     vector<VertexTexture*> vertexTextures;
     vector<TriangleGroup*> triangleGroups;
 
+    glm::vec3 negativeBound;
+    glm::vec3 positiveBound;
+
     ModelState modelState;
 
     // Read a material file
@@ -112,6 +116,7 @@ public:
     ModelState& getModelState();
     float getPhongExponent();
     const glm::vec3& getSpecularColor();
+    CollisionBox getCollision();
 
     // Setters
     void setPhongExponent(float phongExponent);

@@ -12,4 +12,5 @@ public:
 
     const glm::vec3& getPosition();
     void setPosition(const glm::vec3& position);
+    virtual void collisionOccurred();
 };

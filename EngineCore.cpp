@@ -137,14 +137,24 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
 }
 
 void EngineCore::handlePhysics(EngineState& state) {
+    Octree octree(physicsBounds);
+    for (int i = 0; i < state.objects.size(); i++) {
+        octree.addObject(state.objects.at(i));
+    }
+    //octree.levelOrder();
+
     for (int i = 0; i < state.objects.size(); i++) {
         Object* object = state.objects.at(i);
         PhysicsObject* physicsObject = dynamic_cast<PhysicsObject*>(object);
 
         if (physicsObject) {
-            //physicsObject->passTime(simulationDeltaT);
-        }
+            glm::vec3 prevPosition = physicsObject->getPosition();
+            physicsObject->passTime(simulationDeltaT);
 
-        // TODO put quad tree here
+            if (octree.collisionCheck(physicsObject)) {
+                physicsObject->setPosition(prevPosition);
+                physicsObject->collisionOccurred();
+            }
+        }
     }
 }

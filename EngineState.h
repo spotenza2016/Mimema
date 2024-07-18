@@ -3,6 +3,7 @@
 #include "Level.h"
 #include "Object.h"
 #include "PhysicsObject.h"
+#include "BounceObject.h"
 
 struct EngineState {
     Camera::CameraState cameraPrevState;

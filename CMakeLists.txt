@@ -58,5 +58,5 @@ if(NOT stb_POPULATED)
 endif()
 
 # Add WIN32 after exe name to avoid command prompt (will disable cout)
-add_executable(Mimema main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h PhysicsObject.cpp PhysicsObject.h)
+add_executable(Mimema main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h PhysicsObject.cpp PhysicsObject.h Octree.cpp Octree.h CollisionBox.cpp CollisionBox.h BounceObject.cpp BounceObject.h)
 target_link_libraries(Mimema glfw libglew_static OpenGL32 glm stb::image)

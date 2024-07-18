@@ -7,3 +7,11 @@ void Object::setModel(string objFileName) {
 Object::~Object() {
     delete model;
 }
+
+CollisionBox Object::getCollision() {
+    if (model == nullptr) {
+        return {{0, 0, 0}, {0, 0, 0}};
+    }
+
+    return model->getCollision();
+}
