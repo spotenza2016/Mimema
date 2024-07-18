@@ -15,12 +15,13 @@ Mimema (greek for "to imitate") is a "from scratch" C++ 3D Game Engine using Ope
 - 3D Model View and Projection Transformation
 - Camera Movement
 - Fixed Timestep Engine Loop with Interpolation based on Accumulator
-- OOP Classes for Materials, Objects, Levels,
-- Github Integration (planned to make fully open source with issues and PRs)
+- OOP Classes for Materials, Objects, Levels, etc
+- Octree/Basic Collision Detection and Gravity Physics
+- Github Integration (planned to make fully open source with issues and PRs/branch separation)
 
 ## In Progress
 - Standardize Material with MTL File
-- Porting Quad Tree from Old 2D Engine and Adding Basic Physics
+- Rewriting CollisionBox Code and Physics Code
 - OOP Class for Controller (maybe XInput Support also?)
 
 ## Future Goals
