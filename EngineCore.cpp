@@ -66,6 +66,8 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
     float cursorSens = 0.001;
     double cursorX, cursorY;
     glfwGetCursorPos(window, &cursorX, &cursorY);
+    // TODO maybe that mouse bug is because I'm doing fixed step, but last cursorposX may have been older than the fixed step?
+    // hard bug to fix...
     glm::vec2 mouseMovement = glm::vec2((float)(cursorX - lastCursorPosX), (float)(cursorY - lastCursorPosY));
     float yaw = (cursorX - lastCursorPosX) * cursorSens;
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {

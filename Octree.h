@@ -21,7 +21,7 @@ private:
         }
     };
     Node* root = nullptr;
-    int bucketMax = 2;
+    int bucketMax = 8;
     int divisionMax = 100000;
     int size = 0;
     void addObjectHelper(Node *currNode, Object *object, int divisions);
