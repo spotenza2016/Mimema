@@ -11,7 +11,7 @@ void Octree::addObjectHelper(Node* currNode, Object* object, int divisions) {
         for (int i = 0; i < currNode->children.size(); i++) {
             Node* child = currNode->children.at(i);
 
-            if (child->region.intersects(box).first) {
+            if (child->intersects(box)) {
                 addObjectHelper(child, object, divisions + 1);
             }
         }
@@ -25,7 +25,7 @@ bool Octree::collisionHelper(Node* currNode, PhysicsObject *object) const {
         for (int i = 0; i < currNode->children.size(); i++) {
             Node* child = currNode->children.at(i);
 
-            if (child->region.intersects(*object->getCollision()).first) {
+            if (child->intersects(*object->getCollision())) {
                 // todo what about collisions with multiple objects? Important!
                 if (collisionHelper(child, object)) {
                     return true;
@@ -65,7 +65,7 @@ bool Octree::collisionCheck(PhysicsObject* object) const {
     if (root == nullptr) {
         return false;
     }
-    else if (root->region.intersects(*object->getCollision()).first) {
+    else if (root->intersects(*object->getCollision())) {
         return collisionHelper(root, object);
     }
     return false;
@@ -127,49 +127,49 @@ void Octree::addToLeaf(Octree::Node* currNode, Object* object, int divisions) {
     if (divisions < divisionMax && currNode->size > bucketMax) {
         currNode->leaf = false;
         for (int i = 0; i < 8; i++) {
-            glm::vec3 size = currNode->region.size / 2.0f;
+            glm::vec3 size = currNode->regionSize / 2.0f;
             glm::vec3 position;
 
             switch (i) {
                 case 0:
-                    position.x = currNode->region.position.x;
-                    position.y = currNode->region.position.y;
-                    position.z = currNode->region.position.z;
+                    position.x = currNode->position.x;
+                    position.y = currNode->position.y;
+                    position.z = currNode->position.z;
                     break;
                 case 1:
-                    position.x = currNode->region.position.x + size.x;
-                    position.y = currNode->region.position.y;
-                    position.z = currNode->region.position.z;
+                    position.x = currNode->position.x + size.x;
+                    position.y = currNode->position.y;
+                    position.z = currNode->position.z;
                     break;
                 case 2:
-                    position.x = currNode->region.position.x;
-                    position.y = currNode->region.position.y + size.y;
-                    position.z = currNode->region.position.z;
+                    position.x = currNode->position.x;
+                    position.y = currNode->position.y + size.y;
+                    position.z = currNode->position.z;
                     break;
                 case 3:
-                    position.x = currNode->region.position.x;
-                    position.y = currNode->region.position.y;
-                    position.z = currNode->region.position.z + size.z;
+                    position.x = currNode->position.x;
+                    position.y = currNode->position.y;
+                    position.z = currNode->position.z + size.z;
                     break;
                 case 4:
-                    position.x = currNode->region.position.x + size.x;
-                    position.y = currNode->region.position.y + size.y;
-                    position.z = currNode->region.position.z;
+                    position.x = currNode->position.x + size.x;
+                    position.y = currNode->position.y + size.y;
+                    position.z = currNode->position.z;
                     break;
                 case 5:
-                    position.x = currNode->region.position.x + size.x;
-                    position.y = currNode->region.position.y;
-                    position.z = currNode->region.position.z + size.z;
+                    position.x = currNode->position.x + size.x;
+                    position.y = currNode->position.y;
+                    position.z = currNode->position.z + size.z;
                     break;
                 case 6:
-                    position.x = currNode->region.position.x;
-                    position.y = currNode->region.position.y + size.y;
-                    position.z = currNode->region.position.z + size.z;
+                    position.x = currNode->position.x;
+                    position.y = currNode->position.y + size.y;
+                    position.z = currNode->position.z + size.z;
                     break;
                 case 7:
-                    position.x = currNode->region.position.x + size.x;
-                    position.y = currNode->region.position.y + size.y;
-                    position.z = currNode->region.position.z + size.z;
+                    position.x = currNode->position.x + size.x;
+                    position.y = currNode->position.y + size.y;
+                    position.z = currNode->position.z + size.z;
                     break;
                 default:
                     break;
@@ -179,7 +179,7 @@ void Octree::addToLeaf(Octree::Node* currNode, Object* object, int divisions) {
             child->leaf = true;
 
             for (int i = 0; i < currNode->size; i++) {
-                if ((*currNode->contains.at(i)->getCollision()).intersects(child->region).first) {
+                if (child->intersects(*currNode->contains.at(i)->getCollision())) {
                     child->contains.push_back(currNode->contains.at(i));
                     child->size++;
                 }
@@ -188,4 +188,21 @@ void Octree::addToLeaf(Octree::Node* currNode, Object* object, int divisions) {
         currNode->size = 0;
         currNode->contains.clear();
     }
+}
+
+// todo this is wrong, doesn't fully check, maybe i do need SAT, it's not a broad phase problem?
+// todo could use bounding box method for this, test against bounding box
+bool Octree::Node::intersects(const CollisionObject& collision) {
+    for (int i = 0; i < collision.vertices.size(); i++) {
+        glm::vec3 curr = collision.matrix * glm::vec4(collision.vertices[i], 0);
+
+        // todo check that SAT does this too
+        if (curr.x >= position.x && curr.x < position.x + regionSize.x &&
+            curr.y >= position.y && curr.y < position.y + regionSize.y &&
+            curr.z >= position.z && curr.z < position.z + regionSize.z) {
+            return true;
+        }
+    }
+
+    return false;
 }

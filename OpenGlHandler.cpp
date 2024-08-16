@@ -180,6 +180,9 @@ void OpenGlHandler::initUniforms() {
 
     // Add the specular color uniform
     uniformSpecularColorID = glGetUniformLocation(shaderProgram, specularColorUniformName);
+
+    uniformLightPositionsID = glGetUniformLocation(shaderProgram, lightPositionsUniformName);
+    uniformLightIntensitiesID = glGetUniformLocation(shaderProgram, lightIntensitiesUniformName);
 }
 
 // TODO more clean up here
@@ -199,6 +202,19 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
     float aspectRatio = engineState.camera.getCameraState().getAspectRatio() * (float)alpha + engineState.cameraPrevState.getAspectRatio() * (float)(1 - alpha);
     glm::mat4 projectionMatrix = Camera::CameraState::calculateProjectionMatrix(fov, nearClippingPlane, farClippingPlane, aspectRatio);
     glm::mat4 viewMatrix = Camera::CameraState::calculateViewMatrix(cameraPosition, cameraTarget, upVec);
+    // todo move this calculation to gpu, and also tidy up
+    // todo make these dynamic? or turn them into a buffer with a max?
+    // todo create LERP function, and only lerp when needed
+    vector<glm::vec3> lightPositions;
+    vector<float> lightIntensities;
+    lightPositions.resize(engineState.level.getLevelState().lightPositions.size());
+    lightIntensities.resize(engineState.level.getLevelState().lightIntensities.size());
+    for (int i = 0; i < lightPositions.size(); i++) {
+        lightPositions[i] = viewMatrix * glm::vec4(engineState.level.getLevelState().lightPositions[i] * (float)alpha + engineState.levelPrevState.lightPositions[i] * (float)(1 - alpha), 1);
+        lightIntensities[i] = engineState.level.getLevelState().lightIntensities[i] * alpha + engineState.levelPrevState.lightIntensities[i] * (1 - alpha);
+    }
+    glUniform3fv(uniformLightPositionsID, 2, &lightPositions[0][0]);
+    glUniform1fv(uniformLightIntensitiesID, 2, &lightIntensities[0]);
     glm::vec3 lightVec = viewMatrix * glm::vec4(engineState.level.getLevelState().getLightVec() * (float)alpha + engineState.levelPrevState.getLightVec() * (float)(1 - alpha), 0);
     glUniform3fv(uniformLightVecID, 1, &lightVec[0]);
 

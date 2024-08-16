@@ -135,7 +135,7 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
         glfwSwapInterval(1);
     }
 
-    // todo normalize movement vector to avoid diagnal thing
+    // todo normalize movement vector to avoid diagonal thing
 }
 
 void EngineCore::handlePhysics(EngineState& state) {

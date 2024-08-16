@@ -9,9 +9,9 @@ EngineState::EngineState() {
     PhysicsObject* character = new PhysicsObject();
     character->setModel("TestFiles/Secal.obj");
     character->setPosition(glm::vec3(0, 0, 40));
-    //objects.push_back(character);
+    objects.push_back(character);
     BounceObject* objectTwo = new BounceObject();
-    // todo errors out if do set position before model
+    // todo rn errors out if do set position before model, maybe do proper error h andling?
     objectTwo->setModel("TestFiles/sphere.obj");
     objectTwo->setPosition(glm::vec3(-20, 15, 0));
     objectTwo->model->getModelState().setScale({0.25, 0.25, 0.25});

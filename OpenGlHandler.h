@@ -38,10 +38,15 @@ class OpenGlHandler {
     const char* modelViewMatrixUniformName = "modelViewMatrix";
     const char* ambientLightIntensityUniformName = "ambientLightIntensity";
     const char* lightIntensityUniformName = "lightIntensity";
+    const char* lightIntensitiesUniformName = "lightIntensities";
     const char* phongExponentUniformName = "phongExponent";
     const char* lightVecUniformName = "lightVec";
+    const char* lightPositionsUniformName = "lightPositions";
     const char* specularColorUniformName = "specularColor";
-    unsigned int uniformMatrixID, collisionMatrixID, uniformNormalMatrixID, uniformModelViewMatrixID, uniformAmbientLightIntensityID, uniformLightIntensityID, uniformPhongExponentID, uniformLightVecID, uniformSpecularColorID;
+    unsigned int uniformMatrixID, collisionMatrixID, uniformNormalMatrixID,
+                 uniformModelViewMatrixID, uniformAmbientLightIntensityID,
+                 uniformLightIntensityID, uniformPhongExponentID,
+                 uniformLightVecID, uniformSpecularColorID, uniformLightPositionsID, uniformLightIntensitiesID;
 
     // Function to read shader files
     static char* readShader(const string& fileName);

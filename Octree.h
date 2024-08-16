@@ -15,14 +15,18 @@ private:
         vector<Node*> children;
         vector<Object*> contains;
         // Major TODO! Need to convert this to not use SAT for collision since it's so costly
-        CollisionBox region = CollisionBox({}, {});
+        glm::vec3 position;
+        glm::vec3 regionSize;
         int size;
         bool leaf;
         Node(glm::vec3 position, glm::vec3 size) {
-            region = CollisionBox(position, size);
+            this->position = position;
+            this->regionSize = size;
             children.resize(8);
             this->size = 0;
         }
+
+        bool intersects(const CollisionObject& collision);
     };
     Node* root = nullptr;
     int bucketMax = 8;

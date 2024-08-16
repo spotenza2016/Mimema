@@ -30,6 +30,10 @@ pair<bool, pair<double, glm::vec3>> CollisionObject::intersects(const CollisionO
 
     findAxes(*this, rhs, axes);
 
+    if (axes.size() == 0) {
+        return {false, {}};
+    }
+
     // todo make cleaner
     bool overlapSet = false;
     double overlap;
@@ -69,6 +73,7 @@ pair<bool, pair<double, glm::vec3>> CollisionObject::intersects(const CollisionO
     return {true, {overlap, smallestAxis}};
 }
 
+// todo may want to support pills/spheres
 void CollisionObject::findAxes(const CollisionObject& lhs, const CollisionObject& rhs, set<glm::vec3, cmp> &axes) {
     // Face Normals
     // todo maybe precalculate these normals?
@@ -87,18 +92,33 @@ void CollisionObject::findAxes(const CollisionObject& lhs, const CollisionObject
         axes.insert(glm::normalize(glm::cross(vecOne, vecTwo)));
     }
 
-    // Edge Pairs
+    // todo probably want to precalculate this since parallel stays parallel in affine transformation
+    set<glm::vec3, cmp> lhsAxes;
     for (int i = 0; i < lhs.faces.size(); i += 3) {
         for (int j = 0; j < 3; j++) {
             glm::vec3 currLhsEdge = lhs.vertices[lhs.faces[i + ((j + 1) % 3)] - 1] - lhs.vertices[lhs.faces[i + j] - 1];
             currLhsEdge = lhs.matrix * glm::vec4(currLhsEdge, 0);
-            for (int k = 0; k < rhs.faces.size(); k += 3) {
-                for (int l = 0; l < 3; l++) {
-                    glm::vec3 currRhsEdge = rhs.vertices[rhs.faces[k + ((l + 1) % 3)] - 1] - rhs.vertices[rhs.faces[k + l] - 1];
-                    currRhsEdge = rhs.matrix * glm::vec4(currRhsEdge, 0);
-                    axes.insert(glm::normalize(glm::cross(currLhsEdge, currRhsEdge)));
-                }
+            lhsAxes.insert(currLhsEdge);
+        }
+    }
+
+    set<glm::vec3, cmp> rhsAxes;
+    for (int i = 0; i < rhs.faces.size(); i += 3) {
+        for (int j = 0; j < 3; j++) {
+            glm::vec3 currRhsEdge = rhs.vertices[rhs.faces[i + ((j + 1) % 3)] - 1] - rhs.vertices[rhs.faces[i + j] - 1];
+            currRhsEdge = rhs.matrix * glm::vec4(currRhsEdge, 0);
+            rhsAxes.insert(currRhsEdge);
+        }
+    }
+
+    // Edge Pairs
+    for (auto iterLhs = lhsAxes.begin(); iterLhs != lhsAxes.end(); iterLhs++) {
+        for (auto iterRhs = rhsAxes.begin(); iterRhs != rhsAxes.end(); iterRhs++) {
+            glm::vec3 axis = glm::cross(*iterLhs, *iterRhs);
+            if (axis == glm::vec3(0)) {
+                continue;
             }
+            axes.insert(glm::normalize(axis));
         }
     }
 }
