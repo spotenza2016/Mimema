@@ -147,14 +147,18 @@ void EngineCore::handlePhysics(EngineState& state) {
 
     for (int i = 0; i < state.objects.size(); i++) {
         Object* object = state.objects.at(i);
+
+        /*for (int i = 0; i < object->getCollision().vertices.size(); i++) {
+            cout << glm::to_string(object->getCollision().vertices[i]) << " ";
+        }
+        cout << endl;*/
+
         PhysicsObject* physicsObject = dynamic_cast<PhysicsObject*>(object);
 
         if (physicsObject) {
-            glm::vec3 prevPosition = physicsObject->getPosition();
             physicsObject->passTime(simulationDeltaT);
 
             if (octree.collisionCheck(physicsObject)) {
-                physicsObject->setPosition(prevPosition);
                 physicsObject->collisionOccurred();
             }
         }

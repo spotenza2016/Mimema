@@ -8,10 +8,10 @@ Object::~Object() {
     delete model;
 }
 
-CollisionBox Object::getCollision() {
+CollisionObject* Object::getCollision() {
     if (model == nullptr) {
-        return {{0, 0, 0}, {0, 0, 0}};
+        return nullptr;
     }
 
-    return model->getCollision();
+    return &model->getCollision();
 }

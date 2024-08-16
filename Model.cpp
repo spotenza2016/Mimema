@@ -39,6 +39,9 @@ Model::Model(string fileName) {
         return;
     }
 
+    glm::vec3 negativeBound;
+    glm::vec3 positiveBound;
+
     string currLine;
 
     // Read all lines
@@ -180,6 +183,11 @@ Model::Model(string fileName) {
     }
 
     file.close();
+
+    glm::vec3 position = negativeBound;
+    glm::vec3 size = positiveBound - negativeBound;
+    collision = CollisionBox(position, size);
+    collision.generateVAO();
 
     for (int i = 0; i < triangleGroups.size(); i++) {
         triangleGroups.at(i)->generateVAO(this);
@@ -467,10 +475,7 @@ Model::~Model() {
     }
 }
 
-CollisionBox Model::getCollision() {
-    glm::vec3 movedNegativeBound = modelState.getScale() * negativeBound + modelState.getTranslate();
-    glm::vec3 movedPositiveBound = modelState.getScale() * positiveBound + modelState.getTranslate();
-
-    glm::vec3 size = abs(movedPositiveBound - movedNegativeBound);
-    return {min(movedNegativeBound, movedPositiveBound), size};
+CollisionObject& Model::getCollision() {
+    collision.matrix = modelState.getModelMatrix();
+    return collision;
 }

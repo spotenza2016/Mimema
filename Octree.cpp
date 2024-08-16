@@ -6,12 +6,12 @@ void Octree::addObject(Object *object) {
 }
 
 void Octree::addObjectHelper(Node* currNode, Object* object, int divisions) {
-    CollisionBox box = object->getCollision();
+    CollisionObject& box = *object->getCollision();
     if (!currNode->leaf) {
         for (int i = 0; i < currNode->children.size(); i++) {
             Node* child = currNode->children.at(i);
 
-            if (child->region.intersects(box)) {
+            if (child->region.intersects(box).first) {
                 addObjectHelper(child, object, divisions + 1);
             }
         }
@@ -20,12 +20,13 @@ void Octree::addObjectHelper(Node* currNode, Object* object, int divisions) {
     }
 }
 
-bool Octree::collisionHelper(Node* currNode, Object *object) const {
+bool Octree::collisionHelper(Node* currNode, PhysicsObject *object) const {
     if (!currNode->leaf) {
         for (int i = 0; i < currNode->children.size(); i++) {
             Node* child = currNode->children.at(i);
 
-            if (child->region.intersects(object->getCollision())) {
+            if (child->region.intersects(*object->getCollision()).first) {
+                // todo what about collisions with multiple objects? Important!
                 if (collisionHelper(child, object)) {
                     return true;
                 }
@@ -34,9 +35,25 @@ bool Octree::collisionHelper(Node* currNode, Object *object) const {
         return false;
     } else {
         for (int i = 0; i < currNode->size; i++) {
-            Object* result = currNode->contains.at(i);
-            CollisionBox resultBox = result->getCollision();
-            if (result != object && resultBox.intersects(object->getCollision())) {
+            Object* curr = currNode->contains.at(i);
+            CollisionObject& currCollision = *curr->getCollision();
+
+            if (curr == object) {
+                continue;
+            }
+
+            pair<bool, pair<double, glm::vec3>> intersection = (*object->getCollision()).intersects(currCollision);
+
+            if (intersection.first) {
+                // todo this may not be in right direction? esp with completely within ones?
+                // todo, if we're colliding with dynamic object, maybe move both according to current velocity? or just do average?
+                // if I change both here, how can I ensure I trigger collision for other one? hmmm...
+                // right now I separate them completely, so no collision trigger for other dynamic, important TODO!
+                glm::vec3 position = object->getPosition();
+                // todo may want to convert all to floats to avoid rounding issues like here
+                position += intersection.second.second * (float)intersection.second.first;
+                object->setPosition(position);
+
                 return true;
             }
         }
@@ -44,11 +61,11 @@ bool Octree::collisionHelper(Node* currNode, Object *object) const {
     }
 }
 
-bool Octree::collisionCheck(Object* object) const {
+bool Octree::collisionCheck(PhysicsObject* object) const {
     if (root == nullptr) {
         return false;
     }
-    else if (root->region.intersects(object->getCollision())) {
+    else if (root->region.intersects(*object->getCollision()).first) {
         return collisionHelper(root, object);
     }
     return false;
@@ -162,7 +179,7 @@ void Octree::addToLeaf(Octree::Node* currNode, Object* object, int divisions) {
             child->leaf = true;
 
             for (int i = 0; i < currNode->size; i++) {
-                if (currNode->contains.at(i)->getCollision().intersects(child->region)) {
+                if ((*currNode->contains.at(i)->getCollision()).intersects(child->region).first) {
                     child->contains.push_back(currNode->contains.at(i));
                     child->size++;
                 }

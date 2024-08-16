@@ -94,6 +94,50 @@ int OpenGlHandler::initShaders() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    // todo clean up into own function
+    #ifdef VISUALIZE_HITBOXES
+    // Create Vertex Shader
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    collisionShaderSource = readShader(collisionShaderFileName);
+    glShaderSource(vertexShader, 1, &collisionShaderSource, nullptr);
+    glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+        cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << endl;
+        return -1;
+    }
+
+    // Create Fragment Shader
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    collisionFragmentSource = readShader(collisionFragmentFileName);
+    glShaderSource(fragmentShader, 1, &collisionFragmentSource, nullptr);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+        cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
+        return -1;
+    }
+
+    // Link shaders
+    collisionShader = glCreateProgram();
+    glAttachShader(collisionShader, vertexShader);
+    glAttachShader(collisionShader, fragmentShader);
+    glLinkProgram(collisionShader);
+
+    glGetProgramiv(collisionShader, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(collisionShader, 512, nullptr, infoLog);
+        cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << endl;
+        return -1;
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    #endif
+
     // Enable Depth Drawing
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -111,6 +155,10 @@ int OpenGlHandler::initShaders() {
 void OpenGlHandler::initUniforms() {
     // Create a Uniform Matrix
     uniformMatrixID = glGetUniformLocation(shaderProgram, vertexMatrixUniformName);
+
+    #ifdef VISUALIZE_HITBOXES
+    collisionMatrixID = glGetUniformLocation(collisionShader, vertexMatrixUniformName);
+    #endif
 
     // Create a normal matrix uniform
     uniformNormalMatrixID = glGetUniformLocation(shaderProgram, normalMatrixUniformName);
@@ -139,7 +187,7 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
     // Background
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glUseProgram(shaderProgram);
     glUniform1f(uniformAmbientLightIntensityID, engineState.level.getLevelState().getAmbientLightIntensity() * alpha + engineState.levelPrevState.getAmbientLightIntensity() * (1 - alpha));
     glUniform1f(uniformLightIntensityID, engineState.level.getLevelState().getLightIntensity() * alpha + engineState.levelPrevState.getLightIntensity() * (1 - alpha));
     glm::vec3 cameraPosition = engineState.camera.getCameraState().getCameraPosition() * (float)alpha + engineState.cameraPrevState.getCameraPosition() * (float)(1 - alpha);
@@ -176,15 +224,28 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
         glUniformMatrix4fv(uniformModelViewMatrixID, 1, false, &modelViewMatrix[0][0]);
 
         for (int j = 0; j < model->getNumGroups(); j++) {
-            glUseProgram(shaderProgram);
+            // todo change this to be a texture array or some optimization (shader library?)
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, model->getTexture(j));
 
             glUniform1f(uniformPhongExponentID, model->getPhongExponent());
             glUniform3fv(uniformSpecularColorID, 1, &model->getSpecularColor()[0]);
+            // todo change this to be one VAO and multiple VBOS?
             glBindVertexArray(model->getVAO(j));
             glDrawArrays(GL_TRIANGLES, 0, model->getNumVertices(j));
+            glBindVertexArray(0);
         }
+
+        #ifdef VISUALIZE_HITBOXES
+        glUseProgram(collisionShader);
+        glUniformMatrix4fv(collisionMatrixID, 1, false, &mvpMatrix[0][0]);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        CollisionObject& collision = model->getCollision();
+        glBindVertexArray(collision.VAO);
+        glDrawArrays(GL_TRIANGLES, 0, collision.faces.size());
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glUseProgram(shaderProgram);
+        #endif
     }
 
     glBindVertexArray(0);
@@ -192,7 +253,13 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
     glfwSwapBuffers(window);
 }
 
+// todo maybe delete these earlier?
 OpenGlHandler::~OpenGlHandler() {
-    delete vertexShaderSource;
-    delete fragmentShaderSource;
+    delete[] vertexShaderSource;
+    delete[] fragmentShaderSource;
+
+    #ifdef VISUALIZE_HITBOXES
+    delete[] collisionShaderSource;
+    delete[] collisionFragmentSource;
+    #endif
 }

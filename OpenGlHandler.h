@@ -14,16 +14,23 @@
 #include "EngineState.h"
 using namespace std;
 
+// todo change this to a setting?
+#define VISUALIZE_HITBOXES
+
 // Handler for OpenGL Initialization and Drawing
 class OpenGlHandler {
-    unsigned int shaderProgram;
+    unsigned int shaderProgram, collisionShader;
     const glm::vec4 backgroundColor = glm::vec4(0, 0, 0, 1);
 
     // Shader File Constants
     string vertexShaderFileName = "source.vs";
     string fragmentShaderFileName = "source.fs";
+    string collisionShaderFileName = "collision.vs";
+    string collisionFragmentFileName = "collision.fs";
     char* vertexShaderSource = nullptr;
     char* fragmentShaderSource = nullptr;
+    char* collisionShaderSource = nullptr;
+    char* collisionFragmentSource = nullptr;
 
     // Uniform Constants
     const char* vertexMatrixUniformName = "matrix";
@@ -34,7 +41,7 @@ class OpenGlHandler {
     const char* phongExponentUniformName = "phongExponent";
     const char* lightVecUniformName = "lightVec";
     const char* specularColorUniformName = "specularColor";
-    unsigned int uniformMatrixID, uniformNormalMatrixID, uniformModelViewMatrixID, uniformAmbientLightIntensityID, uniformLightIntensityID, uniformPhongExponentID, uniformLightVecID, uniformSpecularColorID;
+    unsigned int uniformMatrixID, collisionMatrixID, uniformNormalMatrixID, uniformModelViewMatrixID, uniformAmbientLightIntensityID, uniformLightIntensityID, uniformPhongExponentID, uniformLightVecID, uniformSpecularColorID;
 
     // Function to read shader files
     static char* readShader(const string& fileName);

@@ -12,6 +12,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <map>
 #include "Material.h"
+#include "CollisionObject.h"
 #include "CollisionBox.h"
 using namespace std;
 
@@ -85,6 +86,7 @@ private:
         // Generates EBO Vertex/Indices Arrays
         float* generateVBOVertexArray(Model* model);
     };
+    CollisionObject collision;
 
     // Model Uniforms (will be moved to material and array eventually)
     float phongExponent = 16.0f;
@@ -94,9 +96,6 @@ private:
     vector<Vertex*> vertexNormals;
     vector<VertexTexture*> vertexTextures;
     vector<TriangleGroup*> triangleGroups;
-
-    glm::vec3 negativeBound;
-    glm::vec3 positiveBound;
 
     ModelState modelState;
 
@@ -116,7 +115,7 @@ public:
     ModelState& getModelState();
     float getPhongExponent();
     const glm::vec3& getSpecularColor();
-    CollisionBox getCollision();
+    CollisionObject& getCollision();
 
     // Setters
     void setPhongExponent(float phongExponent);
