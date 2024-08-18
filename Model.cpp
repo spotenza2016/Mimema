@@ -186,8 +186,12 @@ Model::Model(string fileName) {
 
     glm::vec3 position = negativeBound;
     glm::vec3 size = positiveBound - negativeBound;
-    collision = CollisionBox(position, size);
+    collision = Renderable(position, size);
+    // todo move to constructor
     collision.generateVAO();
+
+    movedCollision = CollisionObject(collision, modelState.getModelMatrix());
+    appliedMatrix = modelState.getModelMatrix();
 
     for (int i = 0; i < triangleGroups.size(); i++) {
         triangleGroups.at(i)->generateVAO(this);
@@ -299,8 +303,9 @@ int Model::TriangleGroup::getNumVertices() {
 }
 
 // Get the matrix
-glm::mat4 Model::ModelState::getModelMatrix() {
-    return Model::ModelState::calculateModelMatrix(translate, angleX, angleY, angleZ, scale);
+const glm::mat4& Model::ModelState::getModelMatrix() {
+    ZoneScoped;
+    return modelMatrix;
 }
 
 glm::mat4 Model::ModelState::calculateModelMatrix(const glm::vec3& translate, float angleX, float angleY, float angleZ, const glm::vec3& scale) {
@@ -432,22 +437,28 @@ void Model::setSpecularColor(const glm::vec3& specularColor) {
 
 void Model::ModelState::setTranslate(const glm::vec3& translate) {
     this->translate = translate;
+    updateModelMatrix();
 }
 
 void Model::ModelState::setAngleX(float angleX) {
     this->angleX = angleX;
+    updateModelMatrix();
 }
 
 void Model::ModelState::setAngleY(float angleY) {
     this->angleY = angleY;
+    updateModelMatrix();
 }
 
 void Model::ModelState::setAngleZ(float angleZ) {
     this->angleZ = angleZ;
+    updateModelMatrix();
 }
 
+// todo maybe set so can do multple operations at once? lots of micro adjustments possible, maybe do so matrix is set wholesale?
 void Model::ModelState::setScale(const glm::vec3& scale) {
     this->scale = scale;
+    updateModelMatrix();
 }
 
 Model::ModelState& Model::getModelState() {
@@ -476,6 +487,16 @@ Model::~Model() {
 }
 
 CollisionObject& Model::getCollision() {
-    collision.matrix = modelState.getModelMatrix();
-    return collision;
+    ZoneScoped;
+    // todo maybe optimize how I'm getting model matrix, this seems bad
+    const glm::mat4& matrix = modelState.getModelMatrix();
+    if (matrix != appliedMatrix) {
+        movedCollision = CollisionObject(collision, modelState.getModelMatrix());
+        appliedMatrix = matrix;
+    }
+    return movedCollision;
+}
+
+void Model::ModelState::updateModelMatrix() {
+    modelMatrix = Model::ModelState::calculateModelMatrix(translate, angleX, angleY, angleZ, scale);
 }

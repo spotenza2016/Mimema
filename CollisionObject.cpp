@@ -6,7 +6,7 @@ pair<double, double> CollisionObject::project(const CollisionObject& box, const 
     double min, max;
     for (int i = 0; i < vertices.size(); i++) {
         // todo figure out better way so not multiplying so many times
-        glm::vec3 currVertex = glm::vec3(box.matrix * glm::vec4(vertices[i], 1));
+        glm::vec3 currVertex = vertices[i];
         double curr = glm::dot(currVertex, axis);
         if (i == 0) {
             min = curr;
@@ -25,6 +25,16 @@ pair<double, double> CollisionObject::project(const CollisionObject& box, const 
 }
 
 pair<bool, pair<double, glm::vec3>> CollisionObject::intersects(const CollisionObject& rhs) {
+    ZoneScopedN("SAT");
+    // todo make into function
+    float xIntersection = min(bbPos.x + bbSize.x, rhs.bbPos.x + rhs.bbSize.x) - max(bbPos.x, rhs.bbPos.x);
+    float yIntersection = min(bbPos.y + bbSize.y, rhs.bbPos.y + rhs.bbSize.y) - max(bbPos.y, rhs.bbPos.y);
+    float zIntersection = min(bbPos.z + bbSize.z, rhs.bbPos.z + rhs.bbSize.z) - max(bbPos.z, rhs.bbPos.z);
+
+    if (!(xIntersection >= 0 && yIntersection >= 0 && zIntersection >= 0)) {
+        return {false, {}};
+    }
+
     // todo not handling zero width correctly
     set<glm::vec3, cmp> axes;
 
@@ -74,47 +84,21 @@ pair<bool, pair<double, glm::vec3>> CollisionObject::intersects(const CollisionO
 }
 
 // todo may want to support pills/spheres
-void CollisionObject::findAxes(const CollisionObject& lhs, const CollisionObject& rhs, set<glm::vec3, cmp> &axes) {
+void CollisionObject::findAxes(const CollisionObject& lhs, const CollisionObject& rhs, set<glm::vec3, cmp>& axes) {
     // Face Normals
+    // todo avoid the matrix multiplication multiple times
     // todo maybe precalculate these normals?
-    for (int i = 0; i < lhs.faces.size(); i += 3) {
-        glm::vec3 vecOne = lhs.vertices[lhs.faces[i + 1] - 1] - lhs.vertices[lhs.faces[i] - 1];
-        vecOne = lhs.matrix * glm::vec4(vecOne, 0);
-        glm::vec3 vecTwo = lhs.vertices[lhs.faces[i + 2] - 1] - lhs.vertices[lhs.faces[i] - 1];
-        vecTwo = lhs.matrix * glm::vec4(vecTwo, 0);
-        axes.insert(glm::normalize(glm::cross(vecOne, vecTwo)));
+    for (int i = 0; i < lhs.normals.size(); i++) {
+        axes.insert(lhs.normals[i]);
     }
-    for (int i = 0; i < rhs.faces.size(); i += 3) {
-        glm::vec3 vecOne = rhs.vertices[rhs.faces[i + 1] - 1] - rhs.vertices[rhs.faces[i] - 1];
-        vecOne = rhs.matrix * glm::vec4(vecOne, 0);
-        glm::vec3 vecTwo = rhs.vertices[rhs.faces[i + 2] - 1] - rhs.vertices[rhs.faces[i] - 1];
-        vecTwo = rhs.matrix * glm::vec4(vecTwo, 0);
-        axes.insert(glm::normalize(glm::cross(vecOne, vecTwo)));
-    }
-
-    // todo probably want to precalculate this since parallel stays parallel in affine transformation
-    set<glm::vec3, cmp> lhsAxes;
-    for (int i = 0; i < lhs.faces.size(); i += 3) {
-        for (int j = 0; j < 3; j++) {
-            glm::vec3 currLhsEdge = lhs.vertices[lhs.faces[i + ((j + 1) % 3)] - 1] - lhs.vertices[lhs.faces[i + j] - 1];
-            currLhsEdge = lhs.matrix * glm::vec4(currLhsEdge, 0);
-            lhsAxes.insert(currLhsEdge);
-        }
-    }
-
-    set<glm::vec3, cmp> rhsAxes;
-    for (int i = 0; i < rhs.faces.size(); i += 3) {
-        for (int j = 0; j < 3; j++) {
-            glm::vec3 currRhsEdge = rhs.vertices[rhs.faces[i + ((j + 1) % 3)] - 1] - rhs.vertices[rhs.faces[i + j] - 1];
-            currRhsEdge = rhs.matrix * glm::vec4(currRhsEdge, 0);
-            rhsAxes.insert(currRhsEdge);
-        }
+    for (int i = 0; i < rhs.normals.size(); i++) {
+        axes.insert(rhs.normals[i]);
     }
 
     // Edge Pairs
-    for (auto iterLhs = lhsAxes.begin(); iterLhs != lhsAxes.end(); iterLhs++) {
-        for (auto iterRhs = rhsAxes.begin(); iterRhs != rhsAxes.end(); iterRhs++) {
-            glm::vec3 axis = glm::cross(*iterLhs, *iterRhs);
+    for (int i = 0; i < lhs.edges.size(); i++) {
+        for (int j = 0; j < rhs.edges.size(); j++) {
+            glm::vec3 axis = glm::cross(lhs.edges[i], rhs.edges[j]);
             if (axis == glm::vec3(0)) {
                 continue;
             }
@@ -123,55 +107,64 @@ void CollisionObject::findAxes(const CollisionObject& lhs, const CollisionObject
     }
 }
 
-float* CollisionObject::generateVBOVertexArray() {
-    // Generate Vertices Array
-    // todo maybe rework faces?
-    float* vertexArray = new float[faces.size() * 4];
-    for (int i = 0; i < faces.size(); i++) {
-        int vboIndex = 4 * i;
-        vertexArray[vboIndex] = vertices[faces[i] - 1].x;
-        vertexArray[vboIndex + 1] = vertices[faces[i] - 1].y;
-        vertexArray[vboIndex + 2] = vertices[faces[i] - 1].z;
-        vertexArray[vboIndex + 3] = 1;
+CollisionObject::CollisionObject(const Renderable& renderable, glm::mat4 matrix) {
+    ZoneScoped;
+    glm::vec3 minimum;
+    glm::vec3 maximum;
+
+    // todo avoid all new calls when I can, shouldn't ever be using new every frame if i can avoid
+    vertices.resize(renderable.vertices.size());
+    for (int i = 0; i < renderable.vertices.size(); i++) {
+        ZoneScopedN("Vertices");
+        vertices[i] = matrix * glm::vec4(renderable.vertices[i], 1);
+
+        if (i == 0) {
+            minimum = vertices[i];
+            maximum = vertices[i];
+        } else {
+            ZoneScopedN("Check");
+            if (vertices[i].x < minimum.x) {
+                minimum.x = vertices[i].x;
+            }
+            if (vertices[i].y < minimum.y) {
+                minimum.y = vertices[i].y;
+            }
+            if (vertices[i].z < minimum.z) {
+                minimum.z = vertices[i].z;
+            }
+            if (vertices[i].x > maximum.x) {
+                maximum.x = vertices[i].x;
+            }
+            if (vertices[i].y > maximum.y) {
+                maximum.y = vertices[i].y;
+            }
+            if (vertices[i].z > maximum.z) {
+                maximum.z = vertices[i].z;
+            }
+        }
     }
 
-    return vertexArray;
-}
+    bbPos = minimum;
+    bbSize = maximum - minimum;
 
-//todo may want to transfer all these to opengl handler
-void CollisionObject::generateVAO() {
-    float* vertexArray = generateVBOVertexArray();
+    faces = renderable.faces;
 
-    // Create VAO and VBO
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    //todo may want to setup a test map for SAT? cool demo
+    normals.resize(renderable.normals.size());
+    auto iter = renderable.normals.begin();
+    for (int i = 0; i < renderable.normals.size(); i++) {
+        // todo should officialize all these
+        ZoneScopedN("Normals");
+        normals[i] = glm::normalize(matrix * glm::vec4(*iter, 0));
+        iter++;
+    }
 
-    // Create VBO
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, faces.size() * 4 * sizeof(float), vertexArray, GL_STATIC_DRAW);
-
-    // Vertices for VBO
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) 0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
-
-    delete vertexArray;
-
-    vaoVboSet = true;
-}
-
-CollisionObject::~CollisionObject() {
-    // todo better protection on deleting bad VAO/VBO
-    // todo can I somehow prevent from creating temporaries? maybe override the copy assignment?
-    // Delete OpenGL Buffers
-    if (vaoVboSet) {
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
+    edges.resize(renderable.edges.size());
+    iter = renderable.edges.begin();
+    for (int i = 0; i < renderable.edges.size(); i++) {
+        ZoneScopedN("Edges");
+        edges[i] = matrix * glm::vec4(*iter, 0);
+        iter++;
     }
 }
+

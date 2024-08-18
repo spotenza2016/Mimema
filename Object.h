@@ -14,5 +14,5 @@ public:
     // Destructor
     virtual ~Object();
 
-    CollisionObject* getCollision();
+    CollisionObject& getCollision();
 };

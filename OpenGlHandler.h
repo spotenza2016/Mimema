@@ -12,9 +12,11 @@
 #include "Camera.h"
 #include "Level.h"
 #include "EngineState.h"
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyOpenGL.hpp"
 using namespace std;
 
-// todo change this to a setting?
+// todo change this to a setting? probably want to be able to toggle
 #define VISUALIZE_HITBOXES
 
 // Handler for OpenGL Initialization and Drawing

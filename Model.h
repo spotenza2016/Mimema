@@ -13,7 +13,7 @@
 #include <map>
 #include "Material.h"
 #include "CollisionObject.h"
-#include "CollisionBox.h"
+#include "Renderable.h"
 using namespace std;
 
 class Model {
@@ -25,15 +25,18 @@ public:
         float angleY = 0;
         float angleZ = 0;
         glm::vec3 scale = glm::vec3(1, 1, 1);
+        glm::mat4 modelMatrix = glm::mat4(1);
 
     public:
-        glm::mat4 getModelMatrix();
+        // todo maybe make some of these const ref
+        const glm::mat4& getModelMatrix();
         glm::mat4 static calculateModelMatrix(const glm::vec3& translate, float angleX, float angleY, float angleZ, const glm::vec3& scale);
         const glm::vec3& getTranslate();
         float getAngleX();
         float getAngleY();
         float getAngleZ();
         const glm::vec3& getScale();
+        void updateModelMatrix();
 
         // Setters
         void setTranslate(const glm::vec3& translate);
@@ -86,7 +89,6 @@ private:
         // Generates EBO Vertex/Indices Arrays
         float* generateVBOVertexArray(Model* model);
     };
-    CollisionObject collision;
 
     // Model Uniforms (will be moved to material and array eventually)
     float phongExponent = 16.0f;
@@ -103,6 +105,12 @@ private:
     map<string, int> readMaterial(string fileName);
 
 public:
+    Renderable collision;
+
+    // todo def not the best way to do this, do similar to other
+    CollisionObject movedCollision;
+    glm::mat4 appliedMatrix;
+
     // Constructor
     Model(string fileName);
 

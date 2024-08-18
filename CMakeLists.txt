@@ -37,6 +37,19 @@ if(NOT glew_POPULATED)
     add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+FetchContent_Declare(
+        tracy
+        GIT_REPOSITORY https://github.com/wolfpld/tracy
+        GIT_TAG 075395620a504c0cdcaf9bab3d196db16a043de7
+)
+FetchContent_GetProperties(tracy)
+if(NOT tracy_POPULATED)
+    FetchContent_Populate(tracy)
+
+    add_subdirectory(${tracy_SOURCE_DIR} ${tracy_BINARY_DIR})
+endif()
+
+
 # GLM
 FetchContent_Declare(
         glm
@@ -58,5 +71,5 @@ if(NOT stb_POPULATED)
 endif()
 
 # Add WIN32 after exe name to avoid command prompt (will disable cout)
-add_executable(Mimema main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h PhysicsObject.cpp PhysicsObject.h Octree.cpp Octree.h CollisionObject.cpp CollisionObject.h BounceObject.cpp BounceObject.h CollisionBox.cpp CollisionBox.h)
-target_link_libraries(Mimema glfw libglew_static OpenGL32 glm stb::image)
+add_executable(Mimema main.cpp OpenGlHandler.cpp OpenGlHandler.h EngineCore.cpp EngineCore.h Model.h Model.cpp Object.cpp Object.h Level.cpp Level.h Camera.cpp Camera.h Material.cpp Material.h EngineState.cpp EngineState.h PhysicsObject.cpp PhysicsObject.h Octree.cpp Octree.h CollisionObject.cpp CollisionObject.h BounceObject.cpp BounceObject.h Renderable.cpp Renderable.h)
+target_link_libraries(Mimema glfw libglew_static OpenGL32 glm stb::image TracyClient)

@@ -14,7 +14,6 @@ class Material {
     string map_kd;
 public:
     const glm::vec3& getKd();
-    bool testVal = false;
     const string& getMap_kd();
     unsigned int getTexture();
     void setKd(const glm::vec3& kd);

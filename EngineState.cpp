@@ -11,11 +11,11 @@ EngineState::EngineState() {
     character->setPosition(glm::vec3(0, 0, 40));
     objects.push_back(character);
     BounceObject* objectTwo = new BounceObject();
-    // todo rn errors out if do set position before model, maybe do proper error h andling?
     objectTwo->setModel("TestFiles/sphere.obj");
     objectTwo->setPosition(glm::vec3(-20, 15, 0));
     objectTwo->model->getModelState().setScale({0.25, 0.25, 0.25});
     objects.push_back(objectTwo);
+    // todo rn errors out if do set position before model, maybe do proper error h andling?
     Object* objectThree = new Object();
     objectThree->setModel("TestFiles/plane.obj");
     objectThree->model->getModelState().setTranslate(glm::vec3(0, -20, 0));
@@ -44,6 +44,16 @@ EngineState::EngineState() {
     objectSeven->model->getModelState().setTranslate(glm::vec3(99, 79, 0));
     objects.push_back(objectSeven);
 
+    // todo willneed to optimize vbo stuff for higher numbers (rn 60 is good and shows diff)
+    for (int i = 0; i < 60; i++) {
+        BounceObject* curr = new BounceObject();
+        curr->setModel("TestFiles/sphere.obj");
+        curr->setPosition(glm::vec3(-90, 15, -90 + (2 * i)));
+        curr->model->getModelState().setScale({0.05, 0.05, 0.05});
+        objects.push_back(curr);
+    }
+
+    // todo clean up plus weirdness w/ default model matrix...
     objectPrevStates.resize(objects.size());
 
     saveStates();

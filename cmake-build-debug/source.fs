@@ -17,7 +17,7 @@ void main()
 {
    // Shading
    // todo maybe do this texture myself?
-   vec4 newColor;
+   vec4 newColor = vec4(0, 0, 0, 0);
    for (int i = 0; i < 2; i++) {
        vec3 currLightVec = normalize(vFragPos - lightPositions[i]);
        vec4 texturedColor = vFragColor * texture(textureFile, vTexture);

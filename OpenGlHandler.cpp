@@ -187,6 +187,8 @@ void OpenGlHandler::initUniforms() {
 
 // TODO more clean up here
 void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, double alpha) {
+    ZoneScoped;
+    TracyGpuZone("drawFrame");
     // Background
     glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -248,6 +250,7 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
             glUniform3fv(uniformSpecularColorID, 1, &model->getSpecularColor()[0]);
             // todo change this to be one VAO and multiple VBOS?
             glBindVertexArray(model->getVAO(j));
+
             glDrawArrays(GL_TRIANGLES, 0, model->getNumVertices(j));
             glBindVertexArray(0);
         }
@@ -256,7 +259,7 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
         glUseProgram(collisionShader);
         glUniformMatrix4fv(collisionMatrixID, 1, false, &mvpMatrix[0][0]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        CollisionObject& collision = model->getCollision();
+        Renderable& collision = model->collision;
         glBindVertexArray(collision.VAO);
         glDrawArrays(GL_TRIANGLES, 0, collision.faces.size());
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -267,6 +270,7 @@ void OpenGlHandler::drawFrame(GLFWwindow* window, EngineState& engineState, doub
     glBindVertexArray(0);
     glfwPollEvents();
     glfwSwapBuffers(window);
+    TracyGpuCollect;
 }
 
 // todo maybe delete these earlier?

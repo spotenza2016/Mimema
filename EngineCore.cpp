@@ -9,6 +9,8 @@ void EngineCore::engineLoop(int width, int height, const string& name) {
     glfwMakeContextCurrent(window);
     glewInit();
 
+    TracyGpuContext;
+
     // TODO organize (should maybe not be static maybe fine if in another class?)
     // Hide cursor for mouse support
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -22,7 +24,6 @@ void EngineCore::engineLoop(int width, int height, const string& name) {
 
     // Todo next steps here
     EngineState engineState = EngineState();
-    engineState.camera.getCameraState().setAspectRatio((float)width / (float)height);
 
     double accumulator = 0;
     auto t1 = chrono::high_resolution_clock::now();
@@ -50,6 +51,9 @@ void EngineCore::engineLoop(int width, int height, const string& name) {
         const double alpha = accumulator / simulationDeltaT;
 
         glHandler.drawFrame(window, engineState, alpha);
+
+        ZoneScoped;
+        FrameMark;
     }
     //cout <<  1.0 / (average / 1000000000) << endl;
     // TODO remember deletes and glfw shut down, put in destructor here or in openglhandler, probably a good idea to check for leaks
@@ -139,7 +143,12 @@ void EngineCore::processInput(GLFWwindow* window, Camera* camera) {
 }
 
 void EngineCore::handlePhysics(EngineState& state) {
-    Octree octree(physicsBounds);
+    ZoneScoped;
+    // todo optimize this, separate octrees for dynamic and static? could just keep the static objects and rebuild dynamic
+    // todo need to optimize how the tree is built https://stackoverflow.com/questions/37073239/speed-concerns-of-octree-implementation
+    // that's a major bottle neck, need to burst nodes in a more efficient way, also might be good to use memory pool
+    // while I should still do all that, seems the get matrix is the issue
+    Octree octree(position, size);
     for (int i = 0; i < state.objects.size(); i++) {
         octree.addObject(state.objects.at(i));
     }
@@ -147,11 +156,6 @@ void EngineCore::handlePhysics(EngineState& state) {
 
     for (int i = 0; i < state.objects.size(); i++) {
         Object* object = state.objects.at(i);
-
-        /*for (int i = 0; i < object->getCollision().vertices.size(); i++) {
-            cout << glm::to_string(object->getCollision().vertices[i]) << " ";
-        }
-        cout << endl;*/
 
         PhysicsObject* physicsObject = dynamic_cast<PhysicsObject*>(object);
 

@@ -29,7 +29,6 @@ void Material::setMap_kd(const string& map_kd) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    testVal = true;
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);
     // todo use MTL path
@@ -58,7 +57,6 @@ Material::Material() {
     glBindTexture(GL_TEXTURE_2D, texture);
     unsigned char data[3] = {255, 255, 255};
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    testVal = true;
 }
 
 Material::~Material() {

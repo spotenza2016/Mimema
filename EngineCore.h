@@ -7,11 +7,14 @@
 #include "Object.h"
 #include "PhysicsObject.h"
 #include "Octree.h"
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyOpenGL.hpp"
 using namespace std;
 
 // Core class of the engine
 class EngineCore {
-    CollisionBox physicsBounds = {{-100000, -100000, -100000}, {200000, 200000, 200000}};
+    glm::vec3 position = {-200, -200, -200};
+    glm::vec3 size = {400, 400, 400};
 public:
     // Seconds per Frame in 60 FPS
     constexpr static double simulationFPS = 144;
