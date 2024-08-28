@@ -8,7 +8,6 @@ Mimema (greek for "to imitate") is a "from scratch" C++ 3D Game Engine using Ope
 - STB
 
 ## Current Functionality
-![Basic Render](https://github.com/spotenza2016/Mimema/assets/64374401/b8cedbda-ad5d-47ad-9827-75f8961b5877)
 ![Basic Collisions](https://github.com/user-attachments/assets/4f13f023-d4ab-424d-9a9e-eaf46003c0d6)
 ![Collision Boxes](https://github.com/user-attachments/assets/23b6253f-af2e-4845-a995-594c28415fef)
 
