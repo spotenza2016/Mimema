@@ -8,15 +8,16 @@ Mimema (greek for "to imitate") is a "from scratch" C++ 3D Game Engine using Ope
 - STB
 
 ## Current Functionality
-![2024-05-0817-56-47-ezgif com-video-to-gif-converter](https://github.com/spotenza2016/Mimema/assets/64374401/b8cedbda-ad5d-47ad-9827-75f8961b5877)
+![Basic Collisions](https://github.com/user-attachments/assets/4f13f023-d4ab-424d-9a9e-eaf46003c0d6)
+![Collision Boxes](https://github.com/user-attachments/assets/23b6253f-af2e-4845-a995-594c28415fef)
 
 - 3D Model and Texturing Support (Olive Otter model from Shipwrecked64 for Testing)
-- Phong Ambient/Diffuse/Specular Shaders
-- 3D Model View and Projection Transformation
+- Phong Shading with GLSL Shaders
 - Camera Movement
-- Fixed Timestep Engine Loop with Interpolation based on Accumulator
+- Fixed Timestep Engine Loop with Linear Interpolation between frames based on Accumulator
 - OOP Classes for Materials, Objects, Levels, etc
-- Octree/Basic Collision Detection and Gravity Physics
+- Octree Collision Detection and Gravity Physics
+- Separating Axis Theorem for convex colliders
 - Github Integration (planned to make fully open source with issues and PRs/branch separation)
 
 ## In Progress
