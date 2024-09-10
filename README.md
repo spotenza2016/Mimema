@@ -13,22 +13,17 @@ Mimema (greek for "to imitate") is a "from scratch" C++ 3D Game Engine using Ope
 
 - 3D Model and Texturing Support (Olive Otter model from Shipwrecked64 for Testing)
 - Phong Shading with GLSL Shaders
-- Camera Movement
+- Point Light (with attenuation) and 
+- Camera Movement with HMI Class
 - Fixed Timestep Engine Loop with Linear Interpolation between frames based on Accumulator
-- OOP Classes for Materials, Objects, Levels, etc
+- Custom Level File System
 - Octree Collision Detection and Gravity Physics
 - Separating Axis Theorem for convex colliders
-- Github Integration (planned to make fully open source with issues and PRs/branch separation)
 
-## In Progress
-- Standardize Material with MTL File
-- Rewriting CollisionBox Code and Physics Code
-- OOP Class for Controller (maybe XInput Support also?)
-
-## Future Goals
+## Future Goals (check out the Issues tab for full list :D)
 - Shadows and Reflections
-- Object Scripting Support
-- Standardize Level/Object Storage
-- Audio (OpenAL?)
-- Netcode and Proxy Chat
+- Scripting Support
+- Model Animation
+- Audio using OpenAL
 - Setup CI with smell checks and style requirements
+- Netcode and Proxy Chat (long term goal)
