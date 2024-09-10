@@ -1,54 +1,39 @@
-#pragma once
-#include <iostream>
+#ifndef MIMEMA_OCTREE_H
+#define MIMEMA_OCTREE_H
+
 #include <queue>
-#include <cmath>
-#include "Object.h"
-#include "PhysicsObject.h"
+#include <iostream>
+
 #include "tracy/Tracy.hpp"
-#include "CollisionObject.h"
 
-using namespace std;
+#include "Object.h"
 
-// todo avoid delete/new if going to be same size?
-class Octree {
-private:
-    struct Node {
-        vector<Node*> children;
-        vector<Object*> contains;
+namespace Mimema {
+    class Octree {
+    private:
+        struct OctreeNode {
+            glm::vec3 bbPos;
+            glm::vec3 bbSize;
 
-        // todo should have this position/region only within collision bounds so actually splits
-        glm::vec3 position;
-        glm::vec3 regionSize;
-        // todo make sure this isn't misused, probably rename to count or below, hate that regionSize isn't size
-        int size;
-        bool leaf;
-        Node(glm::vec3 position, glm::vec3 size) {
-            this->position = position;
-            this->regionSize = size;
-            children.resize(8);
-            this->size = 0;
-        }
+            std::vector<OctreeNode> childNodes;
+            std::vector<const Object*> objects;
 
-        bool intersects(const CollisionObject& collision);
+            OctreeNode(const glm::vec3& bbPos, const glm::vec3& bbSize);
+        };
+
+        OctreeNode root;
+
+        // -1 means unlimited
+        int bucketMax = -1;
+        int divisionMax = -1;
+
+    public:
+        Octree(const glm::vec3& position, const glm::vec3& size, int bucketMax = -1, int divisionMax = -1);
+
+        void levelOrder();
+        void addObject(const Object* object);
+        glm::vec3 checkCollision(const Object* object);
     };
-    Node* root = nullptr;
+}
 
-    // todo optimize settings?
-    int bucketMax = 16;
-    int divisionMax = 30;
-    int size = 0;
-    void addObjectHelper(Node *currNode, Object *object, int divisions);
-    void addToLeaf(Node* currNode, Object *object, int divisions);
-    bool collisionHelper(Node* currNode, PhysicsObject *object) const;
-
-public:
-    void addObject(Object *object);
-    bool collisionCheck(PhysicsObject* object) const;
-
-    Octree(const glm::vec3& position, const glm::vec3& size);
-
-    ~Octree();
-    void destructorHelper(Node* currNode);
-
-    void levelOrder();
-};
+#endif // MIMEMA_OCTREE_H

@@ -1,64 +1,78 @@
-#pragma once
+#ifndef MIMEMA_RENDERABLE_H
+#define MIMEMA_RENDERABLE_H
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/vec3.hpp>
 #include <glm/ext.hpp>
 #include <glm/geometric.hpp>
 #include <vector>
 #include <set>
-using namespace std;
-// todo combine with model?
+#include <map>
 
-// todo whiteboard OOP
-// todo override copy assignment for this and any other vao/vbo
-struct Renderable {
-    vector<glm::vec3> vertices;
-    vector<int> faces;
-    struct cmp {
-        // todo this may not be the best, turning the final one to true results in major lag for some reason (due to set being obscenely big)
-        // may need to research how sets function
-        bool operator()(const glm::vec3& lhs, const glm::vec3& rhs) {
-            if (lhs.x < rhs.x) {
-                return true;
-            }
-            else if (lhs.x > rhs.x) {
-                return false;
-            }
-            else if (lhs.y < rhs.y) {
-                return true;
-            }
-            else if (lhs.y > rhs.y) {
-                return false;
-            }
-            else if (lhs.z < rhs.z) {
-                return true;
-            }
-            else if (lhs.z > rhs.z) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
+#include "tracy/Tracy.hpp"
+
+#include "Material.h"
+
+namespace Mimema {
+    class Renderable {
+        static const std::string modelFolderLocation;
+        static const std::string materialFolderLocation;
+
+        struct TriangleBuffers {
+            std::vector<glm::vec3> vertices;
+            std::vector<glm::vec3> normals;
+            std::vector<glm::vec2> textures;
+        };
+        struct TriangleGroup {
+            std::vector<glm::vec<3, int>> vertexIndices;
+            std::vector<glm::vec<3, int>> normalIndices;
+            std::vector<glm::vec<3, int>> textureIndices;
+        };
+
+        // Buffer Constants
+        static const int vboBlockSize = 9;
+        static const int vboVertexBlockSize = 4;
+        static const int vboNormalBlockSize = 3;
+        static const int vboTextureBlockSize = 2;
+
+        static const glm::vec3 defaultNormal;
+        static const glm::vec2 defaultTextureCoord;
+
+        unsigned int VAO, VBO;
+        std::vector<std::pair<Material*, int>> triangles;
+
+        glm::vec3 bbPos;
+        glm::vec3 bbSize;
+
+        void readMtlFile(const std::string& fileLocation, std::map<std::string, Material*>& materials);
+
+        void setBuffers(const TriangleBuffers& data,
+                        const std::map<std::string, TriangleGroup*>& triangleGroups);
+
+    public:
+        // Generates a renderable based on an obj file
+        Renderable(const std::string& fileLocation);
+
+        // Generates a cubic renderable object
+        Renderable(const glm::vec3& position, const glm::vec3& size);
+
+        Renderable(const Renderable& rhs) = delete;
+        Renderable(const Renderable&& rhs) = delete;
+        Renderable& operator=(const Renderable& rhs) = delete;
+        Renderable& operator=(Renderable&&) = delete;
+
+        ~Renderable();
+
+        // Getters
+        unsigned int getVAO() const;
+        unsigned int getVBO() const;
+        const glm::vec3& getBBPos() const;
+        const glm::vec3& getBBSize() const;
+        const std::vector<std::pair<Material*, int>>& getTriangles() const;
     };
-    set<glm::vec3, cmp> normals;
-    set<glm::vec3, cmp> edges;
+}
 
-    unsigned int VAO, VBO;
-
-    void generateVAO();
-
-    void calculateNormalsAndEdges();
-
-    ~Renderable();
-
-    // todo watch out for default constructors when destructor will ruin stuff, fix later
-    Renderable() = default;
-    bool setVAOVBO = false;
-
-    Renderable(glm::vec3 position, glm::vec3 size);
-
-private:
-    float* generateVBOVertexArray();
-};
+#endif //MIMEMA_RENDERABLE_H

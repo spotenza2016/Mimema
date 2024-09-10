@@ -1,37 +1,45 @@
-#pragma once
+#ifndef MIMEMA_LEVEL_H
+#define MIMEMA_LEVEL_H
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <vector>
-// todo get rid of these std
-using namespace std;
+#include <list>
 
-class Level {
-public:
-    class LevelState {
-        float ambientLightIntensity = 0.1f;
-        float lightIntensity = 0.8f;
-        glm::vec3 lightVec = glm::normalize(glm::vec3(0, -1, -1.0f));
+#include "tracy/Tracy.hpp"
+
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "Object.h"
+#include "Camera.h"
+#include "RenderState.h"
+
+namespace Mimema {
+    class Level {
+        static const std::string levelFolderLocation;
 
     public:
-        vector<glm::vec3> lightPositions = {{0, 0, 0}, {80, 0, 80}};
-        vector<float> lightIntensities = {0.3f, 0.2f};
+        glm::vec3 bbPos = {0, 0, 0};
+        glm::vec3 bbSize = {0, 0, 0};
 
-        // Getters
-        float getAmbientLightIntensity() const;
-        float getLightIntensity()  const;
-        const glm::vec3& getLightVec()  const;
+        glm::vec4 backgroundColor = glm::vec4(0, 0, 0, 1);
 
-        // Setters
-        void setAmbientLightIntensity(float ambientLightIntensity);
-        void setLightIntensity(float lightIntensity);
-        void setLightVec(const glm::vec3& lightVec);
+        glm::vec3 ambientLightColor = {0, 0, 0};
+        float ambientLightIntensity = 0.0f;
+
+        Camera camera = Camera(Camera::CameraState());
+
+        std::list<DirectionalLight> directionalLights;
+        std::list<PointLight> pointLights;
+        std::list<Object> objects;
+
+        RenderState getState();
+
+        Level() = default;
+        explicit Level(const std::string& levelFile, const std::map<std::string, Renderable*>& renderables);
     };
+}
 
-private:
-    LevelState levelState;
-
-public:
-    LevelState& getLevelState();
-};
+#endif // MIMEMA_LEVEL_H

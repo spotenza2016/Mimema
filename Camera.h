@@ -1,52 +1,41 @@
-#pragma once
+#ifndef MIMEMA_CAMERA_H
+#define MIMEMA_CAMERA_H
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-// Simple Camera Class
-class Camera {
-public:
-    class CameraState {
-        // View Matrix
-        glm::vec3 cameraPosition = glm::vec3(0, 0, -1);
-        glm::vec3 cameraTarget = glm::vec3(0, 0, 0);
-        glm::vec3 upVec = glm::vec3(0, 1, 0);
+#include "tracy/Tracy.hpp"
 
-        // Projection Matrix
-        float fov = 70;
-        float nearClippingPlane = 0.1f;
-        float farClippingPlane = 1000.0f;
-        float aspectRatio = 1.0;
+namespace Mimema {
+    struct Camera {
+        struct CameraState {
+            // View Matrix
+            glm::vec3 cameraPosition = {0, 10, 0};
+            glm::vec3 cameraTarget = {0, 10, -1};
+            glm::vec3 upVec = {0, 1, 0};
 
-    public:
+            // Projection Matrix
+            float fov = 70;
+            float nearClippingPlane = 1.0f;
+            float farClippingPlane = 1000.0f;
+            float aspectRatio = 1;
 
-        // Getters
-        glm::mat4 getViewMatrix() const;
-        glm::mat4 getProjectionMatrix() const;
-        glm::mat4 static calculateViewMatrix(const glm::vec3& cameraPosition, const glm::vec3& cameraTarget, const glm::vec3& upVec);
-        glm::mat4 static calculateProjectionMatrix(float fov, float nearClippingPlane, float farClippingPlane, float aspectRatio);
-        const glm::vec3& getCameraPosition() const;
-        const glm::vec3& getCameraTarget() const;
-        const glm::vec3& getUpVec() const;
-        float getFOV();
-        float getNearClippingPlane();
-        float getFarClippingPlane();
-        float getAspectRatio();
+            CameraState() = default;
 
-        // Setters
-        void setCameraPosition(const glm::vec3& cameraPosition);
-        void setCameraTarget(const glm::vec3& cameraTarget);
-        void setUpVec(const glm::vec3& upVec);
-        void setFOV(float fov);
-        void setNearClippingPlane(float nearClippingPlane);
-        void setFarClippingPlane(float farClippingPlane);
-        void setAspectRatio(float aspectRatio);
+            CameraState(const glm::vec3& cameraPosition, const glm::vec3& cameraTarget, const glm::vec3& upVec,
+                   float fov, float nearClippingPlane, float farClippingPlane, float aspectRatio);
+
+            CameraState operator*(float alpha) const;
+
+            CameraState operator+(const CameraState& rhs) const;
+        };
+
+        CameraState cameraState;
+
+        explicit Camera(CameraState cameraState);
     };
+}
 
-private:
-    CameraState cameraState;
-
-public:
-    CameraState& getCameraState();
-};
+#endif
